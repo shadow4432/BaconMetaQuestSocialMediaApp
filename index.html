@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bacon Social</title>
+    <meta charset="utf-8" />
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        background: #fff3f0;
+        font-family: sans-serif;
+      }
+      #vrOverlay {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        background: rgba(255, 87, 87, 0.9);
+        padding: 10px;
+        border-radius: 10px;
+        color: white;
+        font-weight: bold;
+      }
+      input[type="text"] {
+        font-size: 16px;
+        padding: 8px;
+        width: 80%;
+        border: 2px solid #ff5757;
+        border-radius: 5px;
+      }
+      button {
+        padding: 8px 16px;
+        background: #ff5757;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 8px;
+      }
+      #postArea {
+        position: absolute;
+        bottom: 20px;
+        width: 100%;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Optional 2D overlay for keyboard input -->
+    <div id="postArea">
+      <input type="text" id="textPost" placeholder="Write something bacon-y..." />
+      <br />
+      <button onclick="postText()">Post</button>
+    </div>
+
+    <a-scene>
+      <a-text value="Bacon Social (VR)" position="0 2 -4" align="center" color="#ff5757" width="6"></a-text>
+
+      <!-- Feed panel -->
+      <a-plane id="feedPanel" position="0 0.8 -3" width="2.5" height="2" color="#fff" shadow></a-plane>
+
+      <!-- VR camera -->
+      <a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+    </a-scene>
+
+    <script>
+      function postText() {
+        const textInput = document.getElementById("textPost");
+        const value = textInput.value.trim();
+        if (!value) return;
+
+        let posts = JSON.parse(localStorage.getItem("baconPosts") || "[]");
+        posts.unshift({ text: value, time: new Date().toLocaleTimeString() });
+        localStorage.setItem("baconPosts", JSON.stringify(posts));
+        textInput.value = "";
+        renderFeed();
+      }
+
+      function renderFeed() {
+        const panel = document.getElementById("feedPanel");
+        const posts = JSON.parse(localStorage.getItem("baconPosts") || "[]");
+
+        // Remove old children
+        while (panel.firstChild) panel.removeChild(panel.firstChild);
+
+        posts.slice(0, 5).forEach((post, i) => {
+          const el = document.createElement("a-text");
+          el.setAttribute("value", `${post.text} (${post.time})`);
+          el.setAttribute("color", "#000");
+          el.setAttribute("width", "2.4");
+          el.setAttribute("position", `-1.2 ${0.8 - i * 0.45} 0.01`);
+          panel.appendChild(el);
+        });
+      }
+
+      window.onload = renderFeed;
+    </script>
+  </body>
+</html>
